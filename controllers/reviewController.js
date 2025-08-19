@@ -1,6 +1,4 @@
 import Review from '../models/review.js';
-//import Product from '../models/product.js';
-//import user from '../models/User.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -84,4 +82,5 @@ export const getProductsSortedByRating = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
