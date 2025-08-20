@@ -54,13 +54,7 @@ export const verifyOTP = async (req, res) => {
     user.otp = null; // Clear OTP after successful verification
     user.otpExpires = null;
     await user.save();
-
-    const token = jwt.sign(
-      { userId: user._id.toString(), mobile: user.mobile },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES || '1h' }
-    );
-    
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
     
     res.json({ message: 'OTP verified successfully' ,token });
   } catch (error) {
