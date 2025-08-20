@@ -78,24 +78,5 @@ export const deleteReview = async (req, res) => {
   }
 };
 
-export const getProductsSortedByRating = async (req, res) => {
-  try {
-    const products = await Review.aggregate([
-      { $match: { status: 'approved' } },
-      { $group: { _id: '$product', avgRating: { $avg: '$rating' } } },
-      { $sort: { avgRating: -1 } },
-      {
-        $lookup: {
-          from: 'products', // must match your actual Mongo collection name
-          localField: '_id',
-          foreignField: '_id',
-          as: 'productDetails'
-        }
-      },
-      { $unwind: '$productDetails' } // ensures productDetails is an object, not an array
-    ]);
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+
+
