@@ -19,7 +19,7 @@ const productDetails = new mongoose.Schema({
 const productSchema = new mongoose.Schema({
   name: String,
   description: String,
-  discount: Number, 
+  discount: Number, // in percentage
   category: {
     type: String,
     enum: ['men', 'women', 'kids', 'accessories'],
@@ -27,12 +27,14 @@ const productSchema = new mongoose.Schema({
   },
   subcategory: {
     type: String,
-    enum: ['men', 'women', 'kids'],
+    enum: ['men', 'women', 'kids'], // only used for accessories
   },
-  images: {
-    type: [String], 
-    default:[]
-  },
+  images: [
+  {
+    url: { type: String, required: true },
+    public_id: { type: String, required: true }
+  }
+],
   variants: [productDetails],
   createdAt: {
     type: Date,
