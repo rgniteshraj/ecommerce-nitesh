@@ -1,35 +1,30 @@
 import Review from '../models/review.js';
 import cloudinary from '../config/cloudinary.js';
-import fs from 'fs';  
-import path from 'path';
 
 const checkIfVerifiedBuyer = async (userId, productId) => {
-  return true; 
+  return true;
 };
 
 export const addReview = async (req, res) => {
   try {
-    const { productId, rating, title, comment} = req.body;
-    let mediaFiles = [];
+    const { productId, rating, title, comment } = req.body;
 
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: 'reviews'
-        });
-        mediaFiles.push({
-          url: result.secure_url,
-          public_id: result.public_id
-        });
-        // Optionally, delete local file after upload
-        fs.unlinkSync(file.path);
-      }
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
     }
 
-    const verifiedBuyer = await checkIfVerifiedBuyer(req.user.userId, productId);
+    console.log("Files uploaded:", req.files);
+
+    const mediaFiles = req.files ? req.files.map(file => ({
+      url: file.path,              // Cloudinary URL
+      public_id: file.filename     // Cloudinary public_id (depends on config)
+    })) : [];
+
+    const verifiedBuyer = await checkIfVerifiedBuyer(req.user.id, productId);
+
     const review = new Review({
       product: productId,
-      user: req.user.userId,
+      user: req.user.id,
       rating,
       title,
       comment,
@@ -37,12 +32,16 @@ export const addReview = async (req, res) => {
       status: 'approved', 
       verifiedBuyer
     });
+
     await review.save();
     res.status(201).json({ message: 'Review submitted successfully', review });
+
   } catch (error) {
+    console.error("Error in addReview:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const getReviews = async (req, res) => {
   try {
@@ -51,7 +50,7 @@ export const getReviews = async (req, res) => {
       .sort({ reviewDate: -1 });
     res.json(reviews);
   } catch (error) {
-    res.status(500).json({ message: error.message }); 
+    res.status(500).json({ message: error.message });
   }
 };
 export const deleteReview = async (req, res) => {
@@ -60,15 +59,11 @@ export const deleteReview = async (req, res) => {
 
     if (!review) return res.status(404).json({ message: 'Review not found' });
 
-    // if (req.user.role !== 'admin' && review.user.toString() !== req.user.userId) {
-    //   return res.status(403).json({ message: 'Not authorized' });
-    // }
-
     if (review.media?.length) {
-      review.media.forEach(filePath => {
-        const fullPath = path.join(process.cwd(), filePath);
-        if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
-      });
+      for (const file of review.media) {
+        await cloudinary.uploader.destroy(file.public_id);
+      }
+
     }
 
     await review.deleteOne();
