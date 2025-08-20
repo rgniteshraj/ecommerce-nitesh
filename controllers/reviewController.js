@@ -1,5 +1,7 @@
 import Review from '../models/review.js';
 import cloudinary from '../config/cloudinary.js';
+import fs from 'fs';  
+import path from 'path';
 
 const checkIfVerifiedBuyer = async (userId, productId) => {
   return true; 
@@ -7,7 +9,7 @@ const checkIfVerifiedBuyer = async (userId, productId) => {
 
 export const addReview = async (req, res) => {
   try {
-    const { productId, rating, title, comment } = req.body;
+    const { productId, rating, title, comment} = req.body;
     let mediaFiles = [];
 
     if (req.files && req.files.length > 0) {
@@ -19,6 +21,8 @@ export const addReview = async (req, res) => {
           url: result.secure_url,
           public_id: result.public_id
         });
+        // Optionally, delete local file after upload
+        fs.unlinkSync(file.path);
       }
     }
 
@@ -30,7 +34,7 @@ export const addReview = async (req, res) => {
       title,
       comment,
       media: mediaFiles,
-      status: 'approved',
+      status: 'approved', 
       verifiedBuyer
     });
     await review.save();
@@ -94,4 +98,3 @@ export const getProductsSortedByRating = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
