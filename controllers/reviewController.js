@@ -5,42 +5,39 @@ const checkIfVerifiedBuyer = async (userId, productId) => {
   return true;
 };
 
+// Add a new review
 export const addReview = async (req, res) => {
-  console.log(req.user.id); // Changed from req.user.userId to req.user.id
-  
   try {
     const { productId, rating, title, comment } = req.body;
-    let mediaFile = null; // Changed to single object
+    let mediaFiles = [];
 
-    // Use req.file instead of req.files (since you're using upload.single())
     if (req.file) {
-      // NO NEED TO UPLOAD TO CLOUDINARY AGAIN!
-      // Multer + CloudinaryStorage already handled the upload
-      mediaFile = {
-        url: req.file.path,        // Cloudinary URL from multer
-        public_id: req.file.filename // Cloudinary public_id from multer
-      };
+      mediaFiles.push({
+        url: req.file.path,       // secure URL from Cloudinary
+        public_id: req.file.filename // Cloudinary public_id
+      });
     }
 
-    const verifiedBuyer = await checkIfVerifiedBuyer(req.user.id, productId); // Changed to req.user.id
-    
+    const verifiedBuyer = await checkIfVerifiedBuyer(req.user.userId, productId);
+
     const review = new Review({
       product: productId,
-      user: req.user.id, // Changed from req.user.userId to req.user.id
+      user: req.user.userId,
       rating,
       title,
       comment,
-      media: mediaFile ? [mediaFile] : [], // Wrap single file in array
+      media: mediaFiles,
       status: 'approved',
       verifiedBuyer
     });
-    
+
     await review.save();
     res.status(201).json({ message: 'Review submitted successfully', review });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const getReviews = async (req, res) => {
   try {
@@ -73,3 +70,4 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
