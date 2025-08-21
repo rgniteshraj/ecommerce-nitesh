@@ -5,17 +5,17 @@ const checkIfVerifiedBuyer = async (userId, productId) => {
   return true;
 };
 
-// Add a new review
 export const addReview = async (req, res) => {
   try {
     const { productId, rating, title, comment } = req.body;
     let mediaFiles = [];
 
-    if (req.file) {
-      mediaFiles.push({
-        url: req.file.path,       // secure URL from Cloudinary
-        public_id: req.file.filename // Cloudinary public_id
-      });
+    // Cloudinary + multer-storage-cloudinary
+    if (req.files && req.files.length > 0) {
+      mediaFiles = req.files.map(file => ({
+        url: file.path,       // secure Cloudinary URL
+        public_id: file.filename // Cloudinary public_id
+      }));
     }
 
     const verifiedBuyer = await checkIfVerifiedBuyer(req.user.userId, productId);
@@ -37,6 +37,7 @@ export const addReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 export const getReviews = async (req, res) => {
@@ -70,4 +71,5 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
