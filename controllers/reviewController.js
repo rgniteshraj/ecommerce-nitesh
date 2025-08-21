@@ -12,21 +12,18 @@ export const addReview = async (req, res) => {
   try {
     const { productId, rating, title, comment } = req.body;
     let mediaFiles = [];
-    // Process uploaded files
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: 'reviews'
-        });
-        mediaFiles.push({
-          url: result.secure_url,
-          public_id: result.public_id
-        });
-      }
+
+    // Handle single image upload
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      mediaFiles.push({
+        url: result.secure_url,
+        public_id: result.public_id
+      });
     }
 
     const verifiedBuyer = await checkIfVerifiedBuyer(req.user.userId, productId);
-    
+
     // Create and save review
     const review = new Review({
       product: productId,
@@ -38,13 +35,12 @@ export const addReview = async (req, res) => {
       status: 'approved', // Could be 'pending' for moderation
       verifiedBuyer
     });
-    
+
     await review.save();
     res.status(201).json({ message: 'Review submitted successfully', review });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-  //console.log("Number of uploaded files:", req.files.length);
 };
 
 // Get reviews for a specific product
@@ -85,7 +81,3 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
-
