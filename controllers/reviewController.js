@@ -52,6 +52,7 @@ export const addReview = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+  console.log("Number of uploaded files:", req.files.length);
 };
 
 // Get reviews for a specific product
@@ -92,4 +93,5 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
