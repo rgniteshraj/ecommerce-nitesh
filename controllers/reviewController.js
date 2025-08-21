@@ -38,8 +38,6 @@ export const addReview = async (req, res) => {
   }
 };
 
-
-
 export const getReviews = async (req, res) => {
   try {
     const reviews = await Review.find({ product: req.params.productId, status: 'approved' })
@@ -71,5 +69,3 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
