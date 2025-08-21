@@ -9,31 +9,32 @@ const checkIfVerifiedBuyer = async (userId, productId) => {
 export const addReview = async (req, res) => {
   try {
     const { productId, rating, title, comment } = req.body;
-    let mediaFile = null;
-
-    if (req.file) { // assuming single file upload (use multer.single)
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: 'reviews'
-      });
-      mediaFile = {
-        url: result.secure_url,
-        public_id: result.public_id
-      };
+    let mediaFiles = [];
+    if (req.files && req.files.length > 0) {
+      mediaFiles = req.files.map(file => ({
+        url: file.path, // this is Cloudinary URL
+        public_id: file.filename // this is Cloudinary public_id
+      }));
     }
-
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: 'reviews'
+        });
+        mediaFiles.push({ url: result.secure_url, public_id: result.public_id });
+      }
+    }
     const verifiedBuyer = await checkIfVerifiedBuyer(req.user.userId, productId);
-
     const review = new Review({
       product: productId,
       user: req.user.userId,
       rating,
       title,
       comment,
-      media: mediaFile, // single image instead of array
-      status: 'approved', 
+      media: mediaFiles,
+      status: 'approved', // change to 'pending' if you want moderation
       verifiedBuyer
     });
-
     await review.save();
     res.status(201).json({ message: 'Review submitted successfully', review });
   } catch (error) {
@@ -71,5 +72,6 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
