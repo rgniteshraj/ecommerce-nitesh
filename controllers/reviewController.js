@@ -12,6 +12,13 @@ export const addReview = async (req, res) => {
   try {
     const { productId, rating, title, comment } = req.body;
     let mediaFiles = [];
+    if (req.files && req.files.length > 0) {
+      mediaFiles = req.files.map(file => ({
+        url: file.path,        // Cloudinary URL
+        public_id: file.filename // Cloudinary public_id
+      }));
+    }
+
 
     // Process uploaded files
     if (req.files && req.files.length > 0) {
@@ -85,3 +92,4 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
