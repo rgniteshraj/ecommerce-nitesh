@@ -12,6 +12,12 @@ export const addReview = async (req, res) => {
     let mediaFiles = [];
 
     if (req.files && req.files.length > 0) {
+      mediaFiles = req.files.map(file => ({
+        url: file.path,       // this is Cloudinary URL
+        public_id: file.filename // this is Cloudinary public_id
+      }));
+    }
+    if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const result = await cloudinary.uploader.upload(file.path, {
           folder: 'reviews'
@@ -48,7 +54,7 @@ export const getReviews = async (req, res) => {
       .sort({ reviewDate: -1 });
     res.json(reviews);
   } catch (error) {
-    res.status(500).json({ message: error.message }); 
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -57,12 +63,6 @@ export const deleteReview = async (req, res) => {
     const review = await Review.findById(req.params.reviewId);
 
     if (!review) return res.status(404).json({ message: 'Review not found' });
-
-    // Authorization check (optional)
-    // if (req.user.role !== 'admin' && review.user.toString() !== req.user.userId) {
-    //   return res.status(403).json({ message: 'Not authorized' });
-    // }
-
     if (review.media?.length) {
       for (const file of review.media) {
         if (file.public_id) {
@@ -77,6 +77,4 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
