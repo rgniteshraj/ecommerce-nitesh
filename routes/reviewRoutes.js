@@ -9,10 +9,11 @@ import {
 
 const router = express.Router();
 
-router.post('/', verifyToken, upload.single('media'), addReview);
+router.post('/', verifyToken, upload.single('media' 5), addReview);
 router.delete('/:reviewId', verifyToken, deleteReview);
 router.get('/:productId', getReviews);
 export default router;
+
 
 
 
