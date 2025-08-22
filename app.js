@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-//import path from 'path';
+import path from 'path';
 import reviewRoutes from './routes/reviewRoutes.js';
 import userRoutes from './routes/userRoutes.js'
 dotenv.config();
@@ -15,4 +15,5 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
+
 
