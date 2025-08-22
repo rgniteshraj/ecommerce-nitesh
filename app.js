@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import reviewRoutes from './routes/reviewRoutes.js';
 import userRoutes from './routes/userRoutes.js'
+console.log('Current directory:', path.resolve());
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -15,5 +16,6 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
+
 
 
