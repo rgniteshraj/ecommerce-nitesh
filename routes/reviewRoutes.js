@@ -1,6 +1,5 @@
 import express from 'express';
-import upload from '../middleware/upload.js';
-import { verifyToken } from '../middleware/authMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 import {
   addReview,
   getReviews,
@@ -9,9 +8,12 @@ import {
 
 const router = express.Router();
 
-router.post('/', verifyToken, upload.array('media', 5), addReview);
+router.post('/', verifyToken, addReview);
 router.delete('/:reviewId', verifyToken, deleteReview);
 router.get('/:productId', getReviews);
+
 export default router;
+
+
 
 
