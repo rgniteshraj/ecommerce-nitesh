@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../middlewares/authMiddleware.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
 import {
   addReview,
@@ -14,6 +14,7 @@ router.delete('/:reviewId', verifyToken, deleteReview);
 router.get('/:productId', getReviews);
 
 export default router;
+
 
 
 
