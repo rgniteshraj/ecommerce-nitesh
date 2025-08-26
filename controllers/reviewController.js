@@ -1,6 +1,6 @@
 import Review from '../models/review.js';
 
-const checkIfVerifiedBuyer = async (userId, productId) => {
+const checkIfVerifiedBuyer = async (_userId, _productId) => {
   return true;
 };
 
@@ -50,3 +50,4 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
