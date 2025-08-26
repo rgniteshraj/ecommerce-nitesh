@@ -1,5 +1,4 @@
 import Review from '../models/review.js';
-import cloudinary from '../config/cloudinary.js';
 
 const checkIfVerifiedBuyer = async (userId, productId) => {
   return true;
@@ -8,15 +7,6 @@ const checkIfVerifiedBuyer = async (userId, productId) => {
 export const addReview = async (req, res) => {
   try {
     const { productId, rating, title, comment } = req.body;
-    let mediaFiles = [];
-
-    // Cloudinary + multer-storage-cloudinary
-    if (req.files && req.files.length > 0) {
-      mediaFiles = req.files.map(file => ({
-        url: file.path,       // secure Cloudinary URL
-        public_id: file.filename // Cloudinary public_id
-      }));
-    }
 
     const verifiedBuyer = await checkIfVerifiedBuyer(req.user.userId, productId);
 
@@ -26,7 +16,6 @@ export const addReview = async (req, res) => {
       rating,
       title,
       comment,
-      media: mediaFiles,
       status: 'approved',
       verifiedBuyer
     });
@@ -43,7 +32,7 @@ export const getReviews = async (req, res) => {
     const reviews = await Review.find({ product: req.params.productId, status: 'approved' })
       .populate('user', 'name')
       .sort({ reviewDate: -1 });
-    res.json(reviews);
+    res.status(200).json(reviews);
   } catch (error) {
     res.status(500).json({ message: error.message }); 
   }
@@ -55,16 +44,8 @@ export const deleteReview = async (req, res) => {
 
     if (!review) return res.status(404).json({ message: 'Review not found' });
 
-    if (review.media?.length) {
-      for (const file of review.media) {
-        if (file.public_id) {
-          await cloudinary.uploader.destroy(file.public_id);
-        }
-      }
-    }
-
     await review.deleteOne();
-    res.json({ message: 'Review deleted successfully' });
+    res.status(200).json({ message: 'Review deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
